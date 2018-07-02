@@ -1,0 +1,44 @@
+version: '3'
+services:
+  web:
+    image: "richarvey/nginx-php-fpm"
+    volumes: 
+      - ./src:/var/www/html/
+      - ./nginx.conf:/etc/nginx/sites-available/default.conf
+      - ./php.ini:/usr/local/etc/php/php.ini
+    #build: 
+      #context: ./
+      #Dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "9000:9000"
+    links: 
+      - "dbservice"
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.16
+  #Oracle Services
+  dbservice:
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.15
+    #build:
+      #context: ./
+      #dockerfile: Dockerfile
+    image: sath89/oracle-12c
+    volumes:
+      - ./sql:/tmp/sql
+    environment:
+      - DBCA_TOTAL_MEMORY=1024
+    #networks:
+    #  - web
+    ports:
+      - "1521:1521"
+      - "8081:8080"
+
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
